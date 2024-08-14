@@ -53,10 +53,10 @@ export class ChessBoard {
         new Pawn(Color.Black),
         new Pawn(Color.Black),
       ],
-      [null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null],
+      [null, null, null, null, null, null, null, null],
     ];
   }
 
@@ -70,5 +70,9 @@ export class ChessBoard {
         piece instanceof Piece ? piece.FENChar : null
       );
     });
+  }
+
+  public static isSquareDark(x: number, y: number): boolean {
+    return (x % 2 == 0 && y % 2 == 0) || (x % 2 == 1 && y % 2 == 1);
   }
 }
