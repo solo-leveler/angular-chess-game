@@ -216,4 +216,35 @@ export class ChessBoard {
     }
     return safeSquares;
   }
+
+  public move(prevX: number, prevY: number, newX: number, newY: number): void {
+    if (!this.areCoordsValid(prevX, prevY) || !this.areCoordsValid(newX, newY))
+      return;
+    const piece: Piece | null = this.chessBoard[prevX][prevY];
+    if (!piece || piece.color !== this._playerColor) return;
+
+    const pieceSafeSquares: Coords[] | undefined = this._safeSqaures.get(
+      prevX + ',' + prevY
+    );
+    if (
+      !pieceSafeSquares ||
+      !pieceSafeSquares.find((coords) => coords.x === newX && coords.y === newY)
+    )
+      throw new Error('Sqaure is not safe');
+
+    if (
+      (piece instanceof Pawn ||
+        piece instanceof King ||
+        piece instanceof Rook) &&
+      !piece.hasMoved
+    )
+      piece.hasMoved = true;
+
+    this.chessBoard[prevX][prevY] = null;
+    this.chessBoard[newX][newY] = piece;
+
+    this._playerColor =
+      this.playerColor === Color.White ? Color.Black : Color.White;
+    this._safeSqaures = this.findSafeSquares();
+  }
 }
