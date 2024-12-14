@@ -38,20 +38,48 @@ export class ChessBoardComponent {
   }
 
   public isSqaureSafeForSelectedPiece(x: number, y: number): boolean {
-    return this.pieceSafeSqaures.some((coords) => coords.x === x && coords.y===y);
+    return this.pieceSafeSqaures.some(
+      (coords) => coords.x === x && coords.y === y
+    );
+  }
+
+  private unmarkingPreviouslySelectedAndSafeSqaures(): void {
+    this.selectedSqaure = { piece: null };
+    this.pieceSafeSqaures = [];
   }
 
   public selectingPiece(x: number, y: number): void {
     const piece: FENChar | null = this.chessBoardView[x][y];
     if (!piece) return;
-    if(this.isWrongPieceSelected(piece)) return;
+    if (this.isWrongPieceSelected(piece)) return;
+
+    const isSameSqaureClicked : boolean = !!this.selectedSqaure.piece && this.selectedSqaure.x === x && this.selectedSqaure.y === y;
+    this.unmarkingPreviouslySelectedAndSafeSqaures();
+    if (isSameSqaureClicked) return;
 
     this.selectedSqaure = { piece, x, y };
     this.pieceSafeSqaures = this.safeSqaures.get(x + ',' + y) || [];
   }
 
-  private isWrongPieceSelected(piece:FENChar) :boolean{
-    const isWhitePieceSelected : boolean = piece === piece.toUpperCase();
-    return isWhitePieceSelected && this.playerColor === Color.Black || !isWhitePieceSelected && this.playerColor === Color.White;
+  private isWrongPieceSelected(piece: FENChar): boolean {
+    const isWhitePieceSelected: boolean = piece === piece.toUpperCase();
+    return (
+      (isWhitePieceSelected && this.playerColor === Color.Black) ||
+      (!isWhitePieceSelected && this.playerColor === Color.White)
+    );
+  }
+
+  private placingPiece(newX: number, newY: number): void {
+    if (!this.selectedSqaure.piece) return;
+    if (!this.isSqaureSafeForSelectedPiece(newX, newY)) return;
+    const { x: prevX, y: prevY } = this.selectedSqaure;
+    this.chessBoard.move(prevX, prevY, newX, newY);
+    this.chessBoardView = this.chessBoard.chessBoardView;
+    this.unmarkingPreviouslySelectedAndSafeSqaures();
+  }
+
+  public move(x: number, y: number): void {
+    this.selectingPiece(x, y);
+    this.placingPiece(x, y);
   }
 }
