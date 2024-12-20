@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 import { ChessBoard } from '../../chess-logic/chess-board';
 import {
+  CheckState,
   Color,
   Coords,
   FENChar,
+  LastMove,
   pieceImagePaths,
   SafeSquares,
 } from '../../chess-logic/model';
@@ -27,6 +29,8 @@ export class ChessBoardComponent {
 
   private selectedSqaure: SelectedSqaure = { piece: null };
   private pieceSafeSqaures: Coords[] = [];
+  private checkState: CheckState = this.chessBoard.checkState;
+  private lastMove: LastMove | undefined = this.chessBoard.lastMove;
 
   public isSquareDark(x: number, y: number): boolean {
     return ChessBoard.isSquareDark(x, y);
@@ -43,6 +47,20 @@ export class ChessBoardComponent {
     );
   }
 
+  public isSquareLastMove(x: number, y: number): boolean {
+    if (!this.lastMove) return false;
+    const { prevX, prevY, currX, currY } = this.lastMove;
+    return (x === prevX && y === prevY) || (x === currX && y === currY);
+  }
+
+  public isSqaureChecked(x: number, y: number) {
+    return (
+      this.checkState.isInCheck &&
+      this.checkState.x === x &&
+      this.checkState.y === y
+    );
+  }
+
   private unmarkingPreviouslySelectedAndSafeSqaures(): void {
     this.selectedSqaure = { piece: null };
     this.pieceSafeSqaures = [];
@@ -53,7 +71,10 @@ export class ChessBoardComponent {
     if (!piece) return;
     if (this.isWrongPieceSelected(piece)) return;
 
-    const isSameSqaureClicked : boolean = !!this.selectedSqaure.piece && this.selectedSqaure.x === x && this.selectedSqaure.y === y;
+    const isSameSqaureClicked: boolean =
+      !!this.selectedSqaure.piece &&
+      this.selectedSqaure.x === x &&
+      this.selectedSqaure.y === y;
     this.unmarkingPreviouslySelectedAndSafeSqaures();
     if (isSameSqaureClicked) return;
 
@@ -75,6 +96,8 @@ export class ChessBoardComponent {
     const { x: prevX, y: prevY } = this.selectedSqaure;
     this.chessBoard.move(prevX, prevY, newX, newY);
     this.chessBoardView = this.chessBoard.chessBoardView;
+    this.checkState = this.chessBoard.checkState;
+    this.lastMove = this.chessBoard.lastMove;
     this.unmarkingPreviouslySelectedAndSafeSqaures();
   }
 
